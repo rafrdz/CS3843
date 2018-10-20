@@ -67,7 +67,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CryptoMain_Initial.cpp" />
+    <ClCompile Include="DecryptData_Initial.cpp" />
+    <ClCompile Include="EncryptData_Initial.cpp" />
+    <ClCompile Include="SHA-256.cpp" />
     <ClCompile Include="Source.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Main.h" />
+    <ClInclude Include="SHA-256.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
