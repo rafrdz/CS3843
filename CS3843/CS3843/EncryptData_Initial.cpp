@@ -22,6 +22,30 @@ int encryptData(char *data, int dataLength)
 	// Also, you cannot use a lot of global variables - work with registers
 
 	__asm {
+		mov ecx, dataLength    // Copy dataLength into ecx register
+		test ecx, ecx    // Check if ecx is 0
+		je ED_EXIT    // Exit if 0
+
+		mov edi, data    // Copy data into edi register
+		test edi, edi    // Check if edi is 0
+		je ED_EXIT    // Exit if 0
+
+		mov esi, gptrPasswordHash[0]
+		shl esi, 8
+		mov ebx, gptrPasswordHash[1]
+		add esi, ebx
+		
+		xor ecx, ecx    // Zero out ecx
+		call ED_LOOP
+
+	ED_LOOP:
+		mov al, byte ptr(edi+ecx)    // Copy 1 byte of 'data' into al
+		// TODO Need to xor each byte with gptrKey[starting_index]
+
+	ED_EXIT:
+	}
+
+	/*__asm {
 		mov eax, gptrPasswordHash[0]
 		shl eax,8 
 		add eax, gptrPasswordHash[1]
@@ -36,7 +60,7 @@ int encryptData(char *data, int dataLength)
 		jne LOOP1
 	
 		
-	}
+	}*/
 
 	return resulti;
 } // encryptData
