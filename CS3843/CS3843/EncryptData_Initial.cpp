@@ -34,6 +34,8 @@ int encryptData(char *data, int dataLength)
 		shl esi, 8
 		mov ebx, gptrPasswordHash[1]
 		add esi, ebx
+
+		mov ebx gptrKey[esi]
 		
 		xor ecx, ecx    // Zero out ecx
 		call ED_LOOP
