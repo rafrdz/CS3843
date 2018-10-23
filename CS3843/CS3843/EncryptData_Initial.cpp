@@ -37,10 +37,17 @@ int encryptData(char *data, int dataLength)
 		
 		xor ecx, ecx    // Zero out ecx
 		call ED_LOOP
+		add esp, 12
+		jmp ED_EXIT
 
 	ED_LOOP:
-		mov al, byte ptr(edi+ecx)    // Copy 1 byte of 'data' into al
+		push ebp
+		mov ebp, esp
+		mov al, byte ptr[edi+ecx]    // Copy 1 byte of 'data' into al
 		// TODO Need to xor each byte with gptrKey[starting_index]
+		mov esp, ebp
+		pop ebp
+		ret
 
 	ED_EXIT:
 	}
