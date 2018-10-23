@@ -15,7 +15,8 @@ int encryptData(char *data, int dataLength)
 	gdebug2 = 0;					// also can have a breakpoint in C code
 
 	int interator = 0;
-	int starting_index = 0;
+	int starting_index = gptrPasswordHash[0] * 256 + gptrPasswordHash[1];
+	unsigned char lValue = gptrKey[starting_index];
 	// You can not declare any local variables in C, but should use resulti to indicate any errors
 	// Set up the stack frame and assign variables in assembly if you need to do so
 	// access the parameters BEFORE setting up your own stack frame
@@ -30,26 +31,24 @@ int encryptData(char *data, int dataLength)
 		test edi, edi    // Check if edi is 0
 		je ED_EXIT    // Exit if 0
 
-		mov esi, gptrPasswordHash[0]
-		shl esi, 8
-		mov ebx, gptrPasswordHash[1]
+		mov esi, [gptrPasswordHash + 0]
+		shl [esi], 8
+		mov ebx, [gptrPasswordHash + 1]
 		add esi, ebx
 
-		mov ebx gptrKey[esi]
+		//mov ebx, lValue
 		
 		xor ecx, ecx    // Zero out ecx
-		call ED_LOOP
-		add esp, 12
-		jmp ED_EXIT
 
 	ED_LOOP:
 		push ebp
 		mov ebp, esp
 		mov al, byte ptr[edi+ecx]    // Copy 1 byte of 'data' into al
-		// TODO Need to xor each byte with gptrKey[starting_index]
-		mov esp, ebp
-		pop ebp
-		ret
+		xor eax, ebx
+		mov byte ptr[edi+ecx], al
+		inc ecx
+		cmp ecx, dataLength
+		jne ED_LOOP
 
 	ED_EXIT:
 	}
