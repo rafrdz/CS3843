@@ -31,12 +31,21 @@ int encryptData(char *data, int dataLength)
 		test edi, edi    // Check if edi is 0
 		je ED_EXIT    // Exit if 0
 
-		mov esi, [gptrPasswordHash + 0]
-		shl [esi], 8
-		mov ebx, [gptrPasswordHash + 1]
-		add esi, ebx
+		xor ebx,ebx
+		xor eax,eax
+		xor edx,edx
 
-		//mov ebx, lValue
+		mov ebx, gptrPasswordHash
+		mov al, byte ptr[ebx] // Copy first byte of ebx into al
+		shl al, 8 // Multiply by 256
+		mov dl, byte ptr[ebx + 1] // Copy second byte of ebx into dl
+		add al, dl // Add al and bl, store result in al
+
+		xor edx,edx
+		xor ebx,ebx
+
+		mov edx,gptrKey
+		mov bl, byte ptr[edx + eax] // Copy
 		
 		xor ecx, ecx    // Zero out ecx
 
