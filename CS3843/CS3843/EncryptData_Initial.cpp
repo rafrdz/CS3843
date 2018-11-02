@@ -16,68 +16,53 @@ int encryptData(char *data, int dataLength)
 
 	int interator = 0;
 	int starting_index = gptrPasswordHash[0] * 256 + gptrPasswordHash[1];
+	int start_index_2 = gPasswordHash[0] * 256 + gPasswordHash[1];
 	unsigned char lValue = gptrKey[starting_index];
+	unsigned char lValue2 = gkey[start_index_2];
 	// You can not declare any local variables in C, but should use resulti to indicate any errors
 	// Set up the stack frame and assign variables in assembly if you need to do so
 	// access the parameters BEFORE setting up your own stack frame
 	// Also, you cannot use a lot of global variables - work with registers
 
 	__asm {
-		mov ecx, dataLength    // Copy dataLength into ecx register
-		test ecx, ecx    // Check if ecx is 0
-		je ED_EXIT    // Exit if 0
+		// Encrypt code by Team 6
+		// Rafael Rodriguez, David Brenner, Jacob DeHoyos
+		xor esi, esi
+		xor edi, edi
+		xor eax, eax
+		xor ebx, ebx
+		xor ecx, ecx
+		xor edx, edx
 
-		mov edi, data    // Copy data into edi register
-		test edi, edi    // Check if edi is 0
-		je ED_EXIT    // Exit if 0
+		mov esi, gptrKey
 
-		xor ebx,ebx
-		xor eax,eax
-		xor edx,edx
+		mov edi, gptrPasswordHash
 
-		mov ebx, gptrPasswordHash
-		mov al, byte ptr[ebx] // Copy first byte of ebx into al
-		shl al, 8 // Multiply by 256
-		mov dl, byte ptr[ebx + 1] // Copy second byte of ebx into dl
-		add al, dl // Add al and bl, store result in al
+		movzx eax, byte ptr[edi] // Get first byte of password hash
+		shl eax, 8 // Multiply first byte of password hash by 256
+		movzx ebx, byte ptr[edi + 1] // Get second byte of password hash
+		add eax, ebx // Sum the two bytes to get starting_index
 
-		xor edx,edx
-		xor ebx,ebx
+		movzx edx, byte ptr[gkey + eax] // Get the gKey[starting_index] value
+		mov ecx, data
 
-		mov edx,gptrKey
-		mov bl, byte ptr[edx + eax] // Copy
-		
-		xor ecx, ecx    // Zero out ecx
+		xor ebx, ebx // Zero out ebx to use at the iterator value
+		xor eax, eax // Zero out eax to use as xor temp value
+		xor esi, esi // Zero out esi to store dataLength
 
-	ED_LOOP:
-		push ebp
-		mov ebp, esp
-		mov al, byte ptr[edi+ecx]    // Copy 1 byte of 'data' into al
-		xor eax, ebx
-		mov byte ptr[edi+ecx], al
-		inc ecx
-		cmp ecx, dataLength
-		jne ED_LOOP
+		mov esi, dataLength
+		dec esi // Decrement esi for 0-indexing
 
-	ED_EXIT:
+	ENC_LOOP:
+		mov al, byte ptr[ecx + ebx] // Copy byte of data into al
+		xor al, dl // xor byte of data with gKey[starting_index]
+		mov byte ptr[ecx + ebx], al // Copy al back into data
+		inc ebx // Increment iterator
+		cmp ebx, esi // Check if end of data
+		je ENC_EXIT
+		jmp ENC_LOOP // Repeat loop
+
+	ENC_EXIT:
 	}
-
-	/*__asm {
-		mov eax, gptrPasswordHash[0]
-		shl eax,8 
-		add eax, gptrPasswordHash[1]
-		mov starting_index,eax
-
-	LOOP1:
-		mov eax, data[interator]
-		xor eax, gptrKey[starting_index]
-		mov data[interator],eax
-		mov eax, interator
-		sub eax,dataLength
-		jne LOOP1
-	
-		
-	}*/
-
 	return resulti;
 } // encryptData

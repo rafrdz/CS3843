@@ -20,34 +20,44 @@ int decryptData(char *data, int dataLength)
 	// Also, you cannot use a lot of global variables - work with registers
 
 	__asm {
-		// you will need to reference some of these global variables
-		// (gptrPasswordHash or gPasswordHash), (gptrKey or gkey), gNumRounds
+		// Encrypt code by Team 6
+		// Rafael Rodriguez, David Brenner, Jacob DeHoyos
+		xor esi, esi
+		xor edi, edi
+		xor eax, eax
+		xor ebx, ebx
+		xor ecx, ecx
+		xor edx, edx
 
-		// simple example that xors 2nd byte of data with 14th byte in the key file
-		lea esi, gkey				// put the ADDRESS of gkey into esi
-			mov esi, gptrKey;			// put the ADDRESS of gkey into esi (since *gptrKey = gkey)
+		mov esi, gptrKey
 
-		lea	esi, gPasswordHash		// put ADDRESS of gPasswordHash into esi
-			mov esi, gptrPasswordHash	// put ADDRESS of gPasswordHash into esi (since unsigned char *gptrPasswordHash = gPasswordHash)
+		mov edi, gptrPasswordHash
 
-			mov al, byte ptr[esi]				// get first byte of password hash
-			mov al, byte ptr[esi + 4]				// get 5th byte of password hash
-			mov ebx, 2
-			mov al, byte ptr[esi + ebx]			// get 3rd byte of password hash
-			mov al, byte ptr[esi + ebx * 2]			// get 5th byte of password hash
+		movzx eax, byte ptr[edi] // Get first byte of password hash
+		shl eax, 8 // Multiply first byte of password hash by 256
+		movzx ebx, byte ptr[edi + 1] // Get second byte of password hash
+		add eax, ebx // Sum the two bytes to get starting_index
 
-			mov ax, word ptr[esi + ebx * 2]			// gets 5th and 6th bytes of password hash ( gPasswordHash[4] and gPasswordHash[5] ) into ax
-			mov eax, dword ptr[esi + ebx * 2]		// gets 4 bytes, as in:  unsigned int X = *( (unsigned int*) &gPasswordHash[4] );
+		movzx edx, byte ptr[gkey + eax] // Get the gKey[starting_index] value
+		mov ecx, data
 
-			mov al, byte ptr[gkey + ebx]			// get's 3rd byte of gkey[] data
+		xor ebx, ebx // Zero out ebx to use at the iterator value
+		xor eax, eax // Zero out eax to use as xor temp value
+		xor esi, esi // Zero out esi to store dataLength
 
-			mov al, byte ptr[gptrKey + ebx]		// THIS IS INCORRECT - will add the address of the gptrKey global variable (NOT the value that gptrKey holds)
+		mov esi, dataLength
+		dec esi // Decrement esi for 0-indexing
 
-			mov al, byte ptr[esi + 0xd];			// access 14th byte in gkey[]: 0, 1, 2 ... d is the 14th byte
-		mov edi, data				// Put ADDRESS of first data element into edi
-			xor byte ptr[edi + 1], al		// Exclusive-or the 2nd byte of data with the 14th element of the keyfile
-			// NOTE: Keyfile[14] = 0x21, that value changes the case of a letter and flips the LSB
-			// Lowercase "c" = 0x63 becomes capital "B" since 0x63 xor 0x21 = 0x42
+	DEC_LOOP :
+		mov al, byte ptr[ecx + ebx] // Copy byte of data into al
+		xor al, dl // xor byte of data with gKey[starting_index]
+		mov byte ptr[ecx + ebx], al // Copy al back into data
+		inc ebx // Increment iterator
+		cmp ebx, esi // Check if end of data
+		je DEC_EXIT 
+		jmp DEC_LOOP // Repeat loop
+
+	DEC_EXIT :
 	}
 
 	return resulti;
