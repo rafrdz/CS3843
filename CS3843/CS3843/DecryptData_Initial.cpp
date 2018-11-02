@@ -20,7 +20,7 @@ int decryptData(char *data, int dataLength)
 	// Also, you cannot use a lot of global variables - work with registers
 
 	__asm {
-		// Encrypt code by Team 6
+		// Decrypt code by Team 6
 		// Rafael Rodriguez, David Brenner, Jacob DeHoyos
 		xor esi, esi
 		xor edi, edi

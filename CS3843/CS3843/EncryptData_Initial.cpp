@@ -14,11 +14,6 @@ int encryptData(char *data, int dataLength)
 	gdebug1 = 0;					// a couple of global variables that could be used for debugging
 	gdebug2 = 0;					// also can have a breakpoint in C code
 
-	int interator = 0;
-	int starting_index = gptrPasswordHash[0] * 256 + gptrPasswordHash[1];
-	int start_index_2 = gPasswordHash[0] * 256 + gPasswordHash[1];
-	unsigned char lValue = gptrKey[starting_index];
-	unsigned char lValue2 = gkey[start_index_2];
 	// You can not declare any local variables in C, but should use resulti to indicate any errors
 	// Set up the stack frame and assign variables in assembly if you need to do so
 	// access the parameters BEFORE setting up your own stack frame
