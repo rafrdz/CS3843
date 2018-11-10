@@ -50,11 +50,13 @@ int encryptData(char *data, int dataLength)
 
 	ENC_LOOP:
 		mov cl, byte ptr[esi + ebx] // Copy byte of data into al
-		//xor al, dl // xor byte of data with gKey[starting_index]
+		xor cl, dl // xor byte of data with gKey[starting_index]
 		//D Code Table
+		push edi
 		lea edi, gEncodeTable
 		movzx edi, byte ptr [edi+ecx]
 		mov ecx, edi
+		pop edi
 		//E
 		push ebx
 		xor ebx,ebx
@@ -69,7 +71,13 @@ int encryptData(char *data, int dataLength)
 		xor eax,eax
 		pop ebx
 		//A
-		xor cl, 0xFF
+		mov eax, ecx
+		shl eax ,1
+		and eax , 0xAA
+		shr ecx , 1
+		and ecx, 0x55
+		add ecx,eax
+		xor eax,eax
 		//C
 		push ebx
 		xor ebx, ebx
