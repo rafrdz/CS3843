@@ -20,7 +20,7 @@ int decryptData(char *data, int dataLength)
 	// Also, you cannot use a lot of global variables - work with registers
 
 	__asm {
-		// Decrypt code by Team 6
+		// Encrypt code by Team 6
 		// Rafael Rodriguez, David Brenner, Jacob DeHoyos
 		xor esi, esi
 		xor edi, edi
@@ -39,27 +39,61 @@ int decryptData(char *data, int dataLength)
 		add eax, ebx // Sum the two bytes to get starting_index
 
 		movzx edx, byte ptr[gkey + eax] // Get the gKey[starting_index] value
-		mov ecx, data
+		mov esi, data
 
 		xor ebx, ebx // Zero out ebx to use at the iterator value
 		xor eax, eax // Zero out eax to use as xor temp value
-		xor esi, esi // Zero out esi to store dataLength
+		xor edi, edi // Zero out edi to store dataLength
 
-		mov esi, dataLength
-		dec esi // Decrement esi for 0-indexing
+		mov edi, dataLength
+		dec edi // Decrement edi for 0-indexing
 
-	DEC_LOOP :
-		mov al, byte ptr[ecx + ebx] // Copy byte of data into al
-		xor al, dl // xor byte of data with gKey[starting_index]
-		mov byte ptr[ecx + ebx], al // Copy al back into data
+	ENC_LOOP :
+		mov cl, byte ptr[esi + ebx] // Copy byte of data into al
+		//xor al, dl // xor byte of data with gKey[starting_index]
+		//D Code Table
+		lea edi, gDecodeTable
+		movzx edi, byte ptr[edi + ecx]
+		mov ecx, edi
+		//E
+		push ebx
+		xor ebx, ebx
+		mov  bl, 8
+	REVERSE :
+		shr ecx, 1
+		rcl al, 1
+		dec bl
+		jne REVERSE
+		mov ecx, eax
+		xor ebx, ebx
+		xor eax, eax
+		pop ebx
+		//A
+		xor cl, 0xFF
+		//C
+		push ebx
+		xor ebx, ebx
+		mov  bl, 4
+	REVERSE_NIBBLE:
+		shr ecx, 1
+		rcr al, 1
+		dec bl
+		jne REVERSE_NIBBLE
+		add ecx, eax
+		xor ebx, ebx
+		xor eax, eax
+		pop ebx
+		//B
+		xor ecx, 0x3C
+
+		mov byte ptr[esi + ebx], cl // Copy al back into data
 		inc ebx // Increment iterator
-		cmp ebx, esi // Check if end of data
-		je DEC_EXIT 
-		jmp DEC_LOOP // Repeat loop
+		cmp ebx, edi // Check if end of data
+		je ENC_EXIT
+		jmp ENC_LOOP // Repeat loop
 
-	DEC_EXIT :
+	ENC_EXIT :
 	}
-
 	return resulti;
 } // decryptData
 
