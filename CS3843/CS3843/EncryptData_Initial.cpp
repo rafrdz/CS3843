@@ -21,7 +21,7 @@ int encryptData(char *data, int dataLength)
 
 	__asm {
 		// Encrypt code by Team 6
-		// Rafael Rodriguez, David Brenner, Jacob DeHoyos
+		// Rafael Rodriguez, David Brenner, Jacob De Hoyos
 		xor esi, esi
 		xor edi, edi
 		xor eax, eax
@@ -51,26 +51,30 @@ int encryptData(char *data, int dataLength)
 	ENC_LOOP:
 		mov cl, byte ptr[esi + ebx] // Copy byte of data into al
 		xor cl, dl // xor byte of data with gKey[starting_index]
-		//D Code Table
+		
+		// D - Code Table Swap
 		push edi
 		lea edi, gEncodeTable
 		movzx edi, byte ptr [edi+ecx]
 		mov ecx, edi
 		pop edi
-		//E
+		
+		// E - Reverse Bit Order
 		push ebx
 		xor ebx,ebx
 		mov  bl, 8
-	REVERSE :
-		shr ecx ,1
-		rcl al , 1
+	
+	REVERSE:
+		shr ecx, 1
+		rcl al, 1
 		dec bl
 		jne REVERSE
 		mov ecx,eax
 		xor ebx,ebx
 		xor eax,eax
 		pop ebx
-		//A
+		
+		// A - Swap Even/Odd Bits
 		mov eax, ecx
 		shl eax ,1
 		and eax , 0xAA
@@ -78,10 +82,12 @@ int encryptData(char *data, int dataLength)
 		and ecx, 0x55
 		add ecx,eax
 		xor eax,eax
-		//C
+		
+		// C - Swap Nibbles
 		push ebx
 		xor ebx, ebx
 		mov  bl, 4
+	
 	REVERSE_NIBBLE:
 		shr ecx, 1
 		rcr al, 1
@@ -91,13 +97,14 @@ int encryptData(char *data, int dataLength)
 		xor ebx, ebx
 		xor eax, eax
 		pop ebx
-		//B
+		
+		// B - Invert Middle 4 Bits
 		xor ecx, 0x3C
 
 		mov byte ptr[esi + ebx], cl // Copy al back into data
 		inc ebx // Increment iterator
 		cmp ebx, edi // Check if end of data
-		je ENC_EXIT
+		je ENC_EXIT // End loop and exit
 		jmp ENC_LOOP // Repeat loop
 
 	ENC_EXIT:
