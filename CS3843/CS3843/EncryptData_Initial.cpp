@@ -20,7 +20,7 @@ int encryptData(char *data, int dataLength)
 	// Also, you cannot use a lot of global variables - work with registers
 
 	__asm {
-		// Decrypt code by Team 6
+		// Encrypt code by Team 6
 		// Rafael Rodriguez, David Brenner, Jacob De Hoyos
 		mov esi, gptrKey // Copy pointer to gKey to esi
 		mov edi, gptrPasswordHash // Copy pointer to gPasswordHash to edi
@@ -40,7 +40,7 @@ int encryptData(char *data, int dataLength)
 		mov edi, dataLength
 		dec edi // Decrement edi for zero-index
 
-	ENC_LOOP :
+	ENC_LOOP:
 		movzx ecx, byte ptr[esi + ebx] // Copy byte of data into ecx
 		xor ecx, edx // xor byte of data with gKey[starting_index]
 
@@ -97,7 +97,7 @@ int encryptData(char *data, int dataLength)
 		inc ebx // Increment iterator
 		jmp ENC_LOOP // Repeat loop
 
-	ENC_EXIT :
+	ENC_EXIT:
 	}
 	return resulti;
 } // encryptData
