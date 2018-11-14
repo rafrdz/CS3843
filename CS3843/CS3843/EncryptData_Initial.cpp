@@ -44,12 +44,12 @@ int encryptData(char *data, int dataLength)
 		movzx ecx, byte ptr[esi + ebx] // Copy byte of data into ecx
 		xor ecx, edx // xor byte of data with gKey[starting_index]
 
-		/*// D - Code Table Swap
+		// D - Code Table Swap
 		push edi // Push "dataLength - 1" to the stack
-		lea edi, gDecodeTable // Move address of gDecodeTable to edi
+		lea edi, gEncodeTable // Move address of gEncodeTable to edi
 		movzx edi, byte ptr [edi + ecx]
 		mov ecx, edi
-		pop edi*/
+		pop edi
 
 		// E - Reverse Bit Order
 		push ebx // Push iterator to the stack
