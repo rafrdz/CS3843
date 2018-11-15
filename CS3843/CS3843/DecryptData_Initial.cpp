@@ -42,37 +42,9 @@ int decryptData(char *data, int dataLength)
 
 	DEC_LOOP:
 		movzx ecx, byte ptr[esi + ebx] // Copy byte of data into ecx
-		xor ecx, edx // xor byte of data with gKey[starting_index]
 
-		// D - Code Table Swap
-		push edi // Push "dataLength - 1" to the stack
-		lea edi, gDecodeTable // Move address of gDecodeTable to edi
-		movzx edi, byte ptr [edi + ecx]
-		mov ecx, edi
-		pop edi
-
-		// E - Reverse Bit Order
-		push ebx // Push iterator to the stack
-		mov ebx, 8 // Set the reverse loop counter
-
-	REVERSE:
-		shr ecx, 1
-		rcl eax, 1
-		dec ebx
-		jne REVERSE
-		mov ecx, eax
-		xor ebx, ebx
-		xor eax, eax
-		pop ebx
-
-		// A - Swap Even/Odd Bits
-		mov eax, ecx // Copy value to eax
-		shl eax, 1 // Shift left by 1
-		and eax, 0xAA // And value by 0xAA
-		shr ecx, 1 // Shift right by 1
-		and ecx, 0x55 // And value by 0x55
-		add ecx, eax // Add values together and store in ecx
-		xor eax, eax // Zero out eax
+		// B - Invert Middle 4 Bits
+		xor ecx, 0x3C // xor value with 0x3C to invert middle 4 bits
 
 		// C - Swap Nibbles
 		push ebx // Push ebx to stack
@@ -88,8 +60,37 @@ int decryptData(char *data, int dataLength)
 		xor eax, eax // Zero out eax
 		pop ebx // Pop ebx off of the stack
 
-		// B - Invert Middle 4 Bits
-		xor ecx, 0x3C // xor value with 0x3C to invert middle 4 bits
+		// A - Swap Even/Odd Bits
+		mov eax, ecx // Copy value to eax
+		shl eax, 1 // Shift left by 1
+		and eax, 0xAA // And value by 0xAA
+		shr ecx, 1 // Shift right by 1
+		and ecx, 0x55 // And value by 0x55
+		add ecx, eax // Add values together and store in ecx
+		xor eax, eax // Zero out eax
+
+		// E - Reverse Bit Order
+		push ebx // Push iterator to the stack
+		mov ebx, 8 // Set the reverse loop counter
+
+	REVERSE:
+		shr ecx, 1
+		rcl eax, 1
+		dec ebx
+		jne REVERSE
+		mov ecx, eax
+		xor ebx, ebx
+		xor eax, eax
+		pop ebx
+
+		// D - Code Table Swap
+		push edi // Push "dataLength - 1" to the stack
+		lea edi, gDecodeTable // Move address of gDecodeTable to edi
+		movzx edi, byte ptr[edi + ecx]
+		mov ecx, edi
+		pop edi
+		
+		xor ecx, edx // xor byte of data with gKey[starting_index]
 
 		mov byte ptr[esi + ebx], cl // Copy cl back into data
 		cmp ebx, edi // Check if end of data
