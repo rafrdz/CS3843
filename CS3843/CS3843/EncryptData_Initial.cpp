@@ -38,25 +38,25 @@ int encryptData(char *data, int dataLength)
 			add eax, ebx // Sum the two bytes to get starting_index
 
 			//movzx edx, byte ptr[gkey + eax] // Get the gKey[starting_index] value
-			movzx edx, eax // starting index
+			mov edx, eax // starting index
 
 			xor ebx, ebx // Zero out ebx
 			xor eax, eax // Zero out eax
 
-			movzx eax, byte ptr[edi + 3 + ecx * 4] // Get first byte of password hash offset by the round
+			movzx eax, byte ptr[edi + 2 + ecx * 4] // Get first byte of password hash offset by the round
 			shl eax, 8 // Multiply first byte of password hash by 256
-			movzx ebx, byte ptr[edi + 4 + ecx * 4] // Get second byte of password hash offset by the round
+			movzx ebx, byte ptr[edi + 3 + ecx * 4] // Get second byte of password hash offset by the round
 			add eax, ebx // Sum the two bytes to get starting_index
 
 			push ecx // Push round number back to stack
-
-			push edx // Push starting index to stack
 
 			cmp eax, 0x00 // Compare hopcount to zero
 			jne PUSHHOP // Jump to PUSHHOP if not equal
 			mov eax, 0xFFFF // Set hopcount to 0xFFFF if the hopcount is equal to zero
 		PUSHHOP:
-		push eax // Push the hopcount ti the stack for later use.
+		push eax // Push the hopcount to the stack for later use.
+
+			push edx // Push starting index to stack
 
 			mov esi, data // Copy data to esi
 
@@ -69,7 +69,16 @@ int encryptData(char *data, int dataLength)
 
 		ENC_LOOP :
 		movzx ecx, byte ptr[esi + ebx] // Copy byte of data into ecx
+			pop eax // pop index off stack into eax
+			movzx edx, byte ptr[gkey + eax] // load the gkey with the offset of index
 			xor ecx, edx // xor byte of data with gKey[starting_index]
+			add eax, [esp] // add the hopcount onto the index
+			cmp eax, 0x10001 // cmp the index to 65537
+			jl PUSHINDEX // Jump to PUSHINDEX if less then 65537
+			sub eax, 0x10001 // Subtract 65537 from if the index is greater than or equal to 65537
+		PUSHINDEX:
+		push eax // Push the index to the stack for later use.
+			xor eax, eax // zero out eax
 
 			// D - Code Table Swap
 			push edi // Push "dataLength - 1" to the stack
@@ -125,6 +134,14 @@ int encryptData(char *data, int dataLength)
 			jmp ENC_LOOP // Repeat loop
 
 		ENC_EXIT :
+		pop eax // Pop index
+			pop eax // Pop hopcount
+			pop eax // Get round number
+			add eax, 0x01 // Add one to round number
+			push eax
+			cmp eax, gNumRounds // cmp round number to number of rounds
+			jl ROUND // jump to ROUND if less than
+			pop eax // clear stack
 	}
 	return resulti;
 } // encryptData
